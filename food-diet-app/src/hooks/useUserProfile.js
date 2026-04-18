@@ -1,10 +1,4 @@
 import { useEffect, useState } from 'react';
-import {
-  fetchRemoteProfile,
-  getClientId,
-  resetRemoteProfile,
-  saveRemoteProfile,
-} from '../utils/profileApi';
 
 const STORAGE_KEY = 'food_diet_user_profile';
 
@@ -34,37 +28,13 @@ function saveLocalProfile(profile) {
 
 export function useUserProfile() {
   const [profile, setProfile] = useState(() => loadStoredProfile());
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    const clientId = getClientId();
-
-    const syncFromRemote = async () => {
-      try {
-        const remote = await fetchRemoteProfile(clientId);
-        if (remote && !cancelled) {
-          setProfile(remote);
-          saveLocalProfile(remote);
-        }
-      } catch (error) {
-        console.warn('Failed to fetch remote profile, using local cache.', error);
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    syncFromRemote();
-
-    return () => {
-      cancelled = true;
-    };
+    setIsLoading(false);
   }, []);
 
   const saveProfile = (updater) => {
-    const clientId = getClientId();
     setProfile((currentProfile) => {
       const nextPartial =
         typeof updater === 'function' ? updater(currentProfile) : updater;
@@ -76,9 +46,6 @@ export function useUserProfile() {
         updatedAt: now,
       };
       saveLocalProfile(updated);
-      saveRemoteProfile(clientId, updated).catch((error) => {
-        console.warn('Failed to sync profile to backend.', error);
-      });
       return updated;
     });
   };
@@ -105,11 +72,7 @@ export function useUserProfile() {
   };
 
   const resetProfile = () => {
-    const clientId = getClientId();
     localStorage.removeItem(STORAGE_KEY);
-    resetRemoteProfile(clientId).catch((error) => {
-      console.warn('Failed to clear profile from backend.', error);
-    });
     setProfile(defaultProfile);
   };
 
