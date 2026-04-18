@@ -3,6 +3,7 @@ services:
     name: food-diet-app-mvp
     runtime: node
     plan: starter
+    rootDir: food-diet-app
     buildCommand: npm install && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
