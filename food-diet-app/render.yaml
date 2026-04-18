@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: food-diet-app-mvp
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+      - key: ALLOWED_ORIGIN
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
+    disk:
+      name: profiles-data
+      mountPath: /var/data
+      sizeGB: 1
